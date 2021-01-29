@@ -7,18 +7,18 @@
       </div>
       <el-form  label-width="0px" :rules="rules" ref="ruleForm" :model="ruleForm" >
       <!-- 用户名 -->
-           <el-form-item class="a" prop="uname">
-                    <el-input type="primary" v-model="ruleForm.uname"></el-input>
+           <el-form-item class="a" prop="username">
+                    <el-input type="primary" v-model="ruleForm.username"></el-input>
            </el-form-item>
            <!-- 密码 -->
-           <el-form-item class="b" prop="pass">
-                    <el-input type="password" v-model="ruleForm.pass"  autocomplete="off"></el-input>
+           <el-form-item class="b" prop="password">
+                    <el-input type="password" v-model="ruleForm.password"  autocomplete="off"></el-input>
            </el-form-item>
      
   <!-- 登录 -->
        <el-form-item class="btns">
          <!-- @click="submitForm('ruleForm')" -->
-                 <el-button type="primary">登录</el-button>
+                 <el-button type="primary" @click="login">登录</el-button>
   <!-- 重置 -->
                 <el-button  type="info" @click="resetForm('ruleForm')">重置</el-button>
       </el-form-item>
@@ -28,18 +28,19 @@
 </template>
 
 <script>
+let flag=0;
 export default {
 data(){
     
   return {
     ruleForm: {
-      uname:'abbye',
-      pass:'ilovehl'
+      username:'admin',
+      password:'123456'
     },
       rules: {
    uname: [
             { required: true, message: '请输入名称', trigger: 'blur' },
-            { min: 2, max: 5, message: '长度在 2 到 5 个字符', trigger: 'blur' }
+            { min: 3, max: 8, message: '长度在 3 到 8 个字符', trigger: 'blur' }
           ],
            pass: [
            { required: true, message: '请输入密码', trigger: 'blur' },
@@ -54,12 +55,26 @@ data(){
   }
   },
   methods:{
+      
     resetForm(formName) {
         this.$refs[formName].resetFields();
+      },
+      login() {
+        this.$refs.ruleForm.validate(async (valid) => {
+          if (!valid){return}
+          const { data:res }=await this.$http.post('login',this.ruleForm)
+           if (res.meta.status !== 200) {
+              console.log("失败");
+               return  this.$message.error('未注册'+res.meta.msg)
+             
+          }
+         this.$message.success('登录成功')
+       
+         window.sessionStorage.setItem('token',res.data.token)
+         this.$router.push('/home')
+        })
       }
-  }
-  
-}
+}}
 </script>
 
 <style lang="less" scoped>
@@ -107,7 +122,7 @@ data(){
     position: absolute;
     bottom: 0;
     width: 100%;
-    padding: 0 20px;
+    padding: 0 30px;
     box-sizing: border-box;
   }
   .btns {
